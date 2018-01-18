@@ -57,17 +57,17 @@ OBJECTDIR=build/${CND_CONF}/${IMAGE_TYPE}
 DISTDIR=dist/${CND_CONF}/${IMAGE_TYPE}
 
 # Source Files Quoted if spaced
-SOURCEFILES_QUOTED_IF_SPACED=../../../Documents/Workspace/freqcounter.asm
+SOURCEFILES_QUOTED_IF_SPACED=freqcounter.asm
 
 # Object Files Quoted if spaced
-OBJECTFILES_QUOTED_IF_SPACED=${OBJECTDIR}/_ext/2057970831/freqcounter.o
-POSSIBLE_DEPFILES=${OBJECTDIR}/_ext/2057970831/freqcounter.o.d
+OBJECTFILES_QUOTED_IF_SPACED=${OBJECTDIR}/freqcounter.o
+POSSIBLE_DEPFILES=${OBJECTDIR}/freqcounter.o.d
 
 # Object Files
-OBJECTFILES=${OBJECTDIR}/_ext/2057970831/freqcounter.o
+OBJECTFILES=${OBJECTDIR}/freqcounter.o
 
 # Source Files
-SOURCEFILES=../../../Documents/Workspace/freqcounter.asm
+SOURCEFILES=freqcounter.asm
 
 
 CFLAGS=
@@ -94,22 +94,22 @@ MP_LINKER_DEBUG_OPTION=
 # ------------------------------------------------------------------------------------
 # Rules for buildStep: assemble
 ifeq ($(TYPE_IMAGE), DEBUG_RUN)
-${OBJECTDIR}/_ext/2057970831/freqcounter.o: ../../../Documents/Workspace/freqcounter.asm  nbproject/Makefile-${CND_CONF}.mk
-	@${MKDIR} "${OBJECTDIR}/_ext/2057970831" 
-	@${RM} ${OBJECTDIR}/_ext/2057970831/freqcounter.o.d 
-	@${RM} ${OBJECTDIR}/_ext/2057970831/freqcounter.o 
-	@${FIXDEPS} dummy.d -e "${OBJECTDIR}/_ext/2057970831/freqcounter.err" $(SILENT) -c ${MP_AS} $(MP_EXTRA_AS_PRE) -d__DEBUG -d__MPLAB_DEBUGGER_SIMULATOR=1 -q -p$(MP_PROCESSOR_OPTION)  -l\"${OBJECTDIR}/_ext/2057970831/freqcounter.lst\" -e\"${OBJECTDIR}/_ext/2057970831/freqcounter.err\" $(ASM_OPTIONS)    -o\"${OBJECTDIR}/_ext/2057970831/freqcounter.o\" \"../../../Documents/Workspace/freqcounter.asm\" 
-	@${DEP_GEN} -d "${OBJECTDIR}/_ext/2057970831/freqcounter.o"
-	@${FIXDEPS} "${OBJECTDIR}/_ext/2057970831/freqcounter.o.d" $(SILENT) -rsi ${MP_AS_DIR} -c18 
+${OBJECTDIR}/freqcounter.o: freqcounter.asm  nbproject/Makefile-${CND_CONF}.mk
+	@${MKDIR} "${OBJECTDIR}" 
+	@${RM} ${OBJECTDIR}/freqcounter.o.d 
+	@${RM} ${OBJECTDIR}/freqcounter.o 
+	@${FIXDEPS} dummy.d -e "${OBJECTDIR}/freqcounter.err" $(SILENT) -c ${MP_AS} $(MP_EXTRA_AS_PRE) -d__DEBUG -d__MPLAB_DEBUGGER_SIMULATOR=1 -q -p$(MP_PROCESSOR_OPTION)  -l\"${OBJECTDIR}/freqcounter.lst\" -e\"${OBJECTDIR}/freqcounter.err\" $(ASM_OPTIONS)    -o\"${OBJECTDIR}/freqcounter.o\" \"freqcounter.asm\" 
+	@${DEP_GEN} -d "${OBJECTDIR}/freqcounter.o"
+	@${FIXDEPS} "${OBJECTDIR}/freqcounter.o.d" $(SILENT) -rsi ${MP_AS_DIR} -c18 
 	
 else
-${OBJECTDIR}/_ext/2057970831/freqcounter.o: ../../../Documents/Workspace/freqcounter.asm  nbproject/Makefile-${CND_CONF}.mk
-	@${MKDIR} "${OBJECTDIR}/_ext/2057970831" 
-	@${RM} ${OBJECTDIR}/_ext/2057970831/freqcounter.o.d 
-	@${RM} ${OBJECTDIR}/_ext/2057970831/freqcounter.o 
-	@${FIXDEPS} dummy.d -e "${OBJECTDIR}/_ext/2057970831/freqcounter.err" $(SILENT) -c ${MP_AS} $(MP_EXTRA_AS_PRE) -q -p$(MP_PROCESSOR_OPTION)  -l\"${OBJECTDIR}/_ext/2057970831/freqcounter.lst\" -e\"${OBJECTDIR}/_ext/2057970831/freqcounter.err\" $(ASM_OPTIONS)    -o\"${OBJECTDIR}/_ext/2057970831/freqcounter.o\" \"../../../Documents/Workspace/freqcounter.asm\" 
-	@${DEP_GEN} -d "${OBJECTDIR}/_ext/2057970831/freqcounter.o"
-	@${FIXDEPS} "${OBJECTDIR}/_ext/2057970831/freqcounter.o.d" $(SILENT) -rsi ${MP_AS_DIR} -c18 
+${OBJECTDIR}/freqcounter.o: freqcounter.asm  nbproject/Makefile-${CND_CONF}.mk
+	@${MKDIR} "${OBJECTDIR}" 
+	@${RM} ${OBJECTDIR}/freqcounter.o.d 
+	@${RM} ${OBJECTDIR}/freqcounter.o 
+	@${FIXDEPS} dummy.d -e "${OBJECTDIR}/freqcounter.err" $(SILENT) -c ${MP_AS} $(MP_EXTRA_AS_PRE) -q -p$(MP_PROCESSOR_OPTION)  -l\"${OBJECTDIR}/freqcounter.lst\" -e\"${OBJECTDIR}/freqcounter.err\" $(ASM_OPTIONS)    -o\"${OBJECTDIR}/freqcounter.o\" \"freqcounter.asm\" 
+	@${DEP_GEN} -d "${OBJECTDIR}/freqcounter.o"
+	@${FIXDEPS} "${OBJECTDIR}/freqcounter.o.d" $(SILENT) -rsi ${MP_AS_DIR} -c18 
 	
 endif
 
