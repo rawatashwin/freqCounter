@@ -1,3 +1,13 @@
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+; Author: Ashwin Rawat							       ;
+; Program: Frequency Counter						       ;
+; Repo: https://github.com/rawatashwin/freqCounter.git			       ;
+; Device: pic12f675							       ;
+; Description: High rising pulses are counted using timer1 for 62.5ms(timer0)  ;
+; The number obtained is multiplied by 16 to get actual frequency.	       ;
+; Since pic12f675 has only 5 io pins, 74hc595 is used to interact with lcd     ;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+    
 #include "p12f675.inc"
 
 ; CONFIG
@@ -41,6 +51,9 @@
 	freqd0
 	bitcnt	
 	digcnt
+	
+	; Lcd
+	lcd_data
     endc
 
 ; Bank Switching macros
@@ -83,12 +96,11 @@ init:
     
     ; TRISIO
     movlw   b'00101111'
-    bank1
     movwf   TRISIO
     
+    bank0
     ; Setup timer1 as counter to count pulses on pin 2
     movlw   b'00110110'	; Async counter with 1/8 prescaler
-    bank0
     movwf   T1CON
     
     ; Setup timer0 
@@ -97,6 +109,7 @@ init:
     movwf   OPTION_REG
     
     ; Setup LCD
+    
     return
     
 startCounting:
@@ -149,6 +162,10 @@ incTmr1Cntr:
     bsf	    range_err_flag, 0
     return
     
+;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;   Frequency  conversion ;
+;;;;;;;;;;;;;;;;;;;;;;;;;;; 
+   
 getFreq:
     clrf    freqh0
     clrf    freqh1
@@ -170,7 +187,7 @@ times2:
     movwf   freqh2
     rlf	    freqh3
     return
-    
+        
 ; Convert freqh into bcd and store it in freqd
 ; Taken from http://www.piclist.com/techref/member/BB-LTL-/index.htm
 freqToBCD:
@@ -218,7 +235,18 @@ b2bcd2:
     goto    b2bcd1
     retlw   0   
 
-; Interrupt Service Routine    
+    
+;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;   LCD Code              ;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;
+    
+lcd_send_cmd:
+    
+    
+    
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+; Interrupt Service Routine;    
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;   
 isr:
     bank0
     ; Disable Int
@@ -233,6 +261,7 @@ isr:
     ; Check if tmr0 overflowed
     btfsc   INTCON, 2
     call    stopCounting
+    ; Check if tmr1 overflowed
     btfsc   PIR1, 0
     call    incTmr1Cntr
     

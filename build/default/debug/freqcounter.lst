@@ -1,0 +1,579 @@
+MPASM 5.76                   FREQCOUNTER.ASM   1-18-2018  12:02:37         PAGE  1
+
+
+LOC  OBJECT CODE     LINE SOURCE TEXT
+  VALUE
+
+                      00001 #include "p12f675.inc"
+                      00001         LIST
+                      00002 
+                      00003 ;==========================================================================
+                      00004 ; Build date : Sep 19 2017
+                      00005 ;  MPASM PIC12F675 processor include
+                      00006 ; 
+                      00007 ;  (c) Copyright 1999-2017 Microchip Technology, All rights reserved
+                      00008 ;==========================================================================
+                      00009 
+                      00367         LIST
+                      00002 
+                      00003 ; CONFIG
+                      00004 ; __config 0xF1D4
+2007   3FD4           00005  __CONFIG _FOSC_INTRCIO & _WDTE_OFF & _PWRTE_OFF & _MCLRE_OFF & _BOREN_ON & _CP_OFF & _CPD_OFF
+                      00006 
+                      00007 ; Input
+                      00008 #define     freqInput   GPIO, 5
+                      00009 
+                      00010 ; Lcd using 74hc595
+                      00011 #define     lcdData     GPIO, 0
+                      00012 #define     lcdClk      GPIO, 1
+                      00013 #define     lcdEn       GPIO, 2
+                      00014  
+                      00015     cblock          0x20
+  00000020            00016         w_tmp
+  00000021            00017         status_tmp
+  00000022            00018         tmr1_counter
+  00000023            00019         counting_flag
+  00000024            00020         range_err_flag
+                      00021         
+                      00022         ; Pulses per 62.5 ms
+  00000025            00023         freqBy16_2
+  00000026            00024         freqBy16_1
+  00000027            00025         freqBy16_0
+                      00026         ; Frequency in binary
+  00000028            00027         freqh3
+  00000029            00028         freqh2
+  0000002A            00029         freqh1
+  0000002B            00030         freqh0
+                      00031         ; Frequency in bcd
+  0000002C            00032         freqd9
+  0000002D            00033         freqd8
+  0000002E            00034         freqd7
+  0000002F            00035         freqd6
+  00000030            00036         freqd5
+  00000031            00037         freqd4
+  00000032            00038         freqd3
+  00000033            00039         freqd2
+  00000034            00040         freqd1
+  00000035            00041         freqd0
+  00000036            00042         bitcnt  
+  00000037            00043         digcnt
+MPASM 5.76                   FREQCOUNTER.ASM   1-18-2018  12:02:37         PAGE  2
+
+
+LOC  OBJECT CODE     LINE SOURCE TEXT
+  VALUE
+
+                      00044     endc
+                      00045 
+                      00046 ; Bank Switching macros
+                      00047 bank0   macro
+                      00048         bcf STATUS, 5
+                      00049         endm
+                      00050         
+                      00051 bank1   macro
+                      00052         bsf STATUS, 5
+                      00053         endm
+                      00054         
+                      00055 ; Reset Vector
+                      00056     org     0x00
+0000   2???           00057     goto    start
+                      00058     org     0x04
+0004   2???           00059     goto    isr
+                      00060     
+                      00061 ; Start
+0005                  00062 start:
+0005   2???           00063     call    init
+0006   2???           00064     call    repeat
+                      00065 
+                      00066 ; Loop
+0007                  00067 repeat:
+                      00068     ; Skip if still counting
+0007   1C23           00069     btfss   counting_flag, 0
+0008   2???           00070     call    startCounting
+                      00071     ; FreqBy16 to Freqh
+0009   2???           00072     call    getFreq
+                      00073     ; Get Freq in BCD from Freqh
+000A   2???           00074     call    freqToBCD
+                      00075     ; Display on lcd
+000B   2???           00076     goto    repeat
+                      00077     
+000C                  00078 init:
+                      00079     ; Setup GPIO
+                      00080     ; ANSEL
+                      00081     bank1
+000C   1683               M         bsf STATUS, 5
+Message[302]: Register in operand not in bank 0.  Ensure that bank bits are correct.
+000D   019F           00082     clrf    ANSEL
+                      00083     
+                      00084     ; TRISIO
+000E   302F           00085     movlw   b'00101111'
+                      00086     bank1
+000F   1683               M         bsf STATUS, 5
+Message[302]: Register in operand not in bank 0.  Ensure that bank bits are correct.
+0010   0085           00087     movwf   TRISIO
+                      00088     
+                      00089     ; Setup timer1 as counter to count pulses on pin 2
+0011   3036           00090     movlw   b'00110110' ; Async counter with 1/8 prescaler
+                      00091     bank0
+0012   1283               M         bcf STATUS, 5
+MPASM 5.76                   FREQCOUNTER.ASM   1-18-2018  12:02:37         PAGE  3
+
+
+LOC  OBJECT CODE     LINE SOURCE TEXT
+  VALUE
+
+0013   0090           00092     movwf   T1CON
+                      00093     
+                      00094     ; Setup timer0 
+0014   3007           00095     movlw   b'00000111' ; Count system clock with prescler 256
+                      00096     bank0  
+0015   1283               M         bcf STATUS, 5
+Message[302]: Register in operand not in bank 0.  Ensure that bank bits are correct.
+0016   0081           00097     movwf   OPTION_REG
+                      00098     
+                      00099     ; Setup LCD
+0017   0008           00100     return
+                      00101     
+0018                  00102 startCounting:
+                      00103     ; Get number of pulses in 62.5ms and multiply by 16 (62.5ms * 16 = 1s) to get freq in Hz
+                      00104     ; Setup Interrupts
+                      00105     bank1
+0018   1683               M         bsf STATUS, 5
+                      00106     ; Timer1 Int enable
+Message[302]: Register in operand not in bank 0.  Ensure that bank bits are correct.
+0019   140C           00107     bsf     PIE1, 0 
+                      00108     bank0
+001A   1283               M         bcf STATUS, 5
+                      00109     ; Clear tmr1_counter
+001B   01A2           00110     clrf    tmr1_counter
+                      00111     ; Set Counting Flag
+001C   1423           00112     bsf     counting_flag, 0
+                      00113     ; Peripheral Int enable
+001D   170B           00114     bsf     INTCON, 6 
+                      00115     ; Tmr0 Int enable
+001E   168B           00116     bsf     INTCON, 5 
+                      00117     ; Setup timer0 for 62.5ms
+001F   300C           00118     movlw   0x0c   
+0020   0081           00119     movwf   TMR0
+                      00120     ; Start timer1
+0021   1410           00121     bsf     T1CON, 0
+                      00122     ; Enable Int
+0022   178B           00123     bsf     INTCON, 7
+0023   0008           00124     return
+                      00125     
+0024                  00126 stopCounting:
+                      00127     ; Stop timer0 Int
+0024   128B           00128     bcf     INTCON, 5
+                      00129     ; Stop timer1
+0025   1010           00130     bcf     T1CON, 0
+                      00131     ; Reset T0IF
+0026   110B           00132     bcf     INTCON, 2
+                      00133     ; Reset TMR1IF
+0027   100C           00134     bcf     PIR1, 0
+                      00135     ; Reset counting flag
+0028   1023           00136     bcf     counting_flag, 0
+                      00137     ; Put TMR1 into freqBy16
+0029   080E           00138     movf    TMR1L, w
+002A   00A7           00139     movwf   freqBy16_0
+MPASM 5.76                   FREQCOUNTER.ASM   1-18-2018  12:02:37         PAGE  4
+
+
+LOC  OBJECT CODE     LINE SOURCE TEXT
+  VALUE
+
+002B   080F           00140     movf    TMR1H, w
+002C   00A6           00141     movwf   freqBy16_1
+Message[305]: Using default destination of 1 (file).
+002D   08A2           00142     movf    tmr1_counter
+002E   00A5           00143     movwf   freqBy16_2
+002F   0008           00144     return
+                      00145     
+0030                  00146 incTmr1Cntr:
+Message[305]: Using default destination of 1 (file).
+0030   0FA2           00147     incfsz  tmr1_counter
+0031   0008           00148     return
+0032   1424           00149     bsf     range_err_flag, 0
+0033   0008           00150     return
+                      00151     
+0034                  00152 getFreq:
+0034   01AB           00153     clrf    freqh0
+0035   01AA           00154     clrf    freqh1
+0036   01A9           00155     clrf    freqh2
+0037   01A8           00156     clrf    freqh3
+                      00157     
+                      00158     ; Multiply Freq by 2*2*2*2
+0038   2???           00159     call    times2
+0039   2???           00160     call    times2
+003A   2???           00161     call    times2
+003B   2???           00162     call    times2
+003C   0008           00163     return    
+003D                  00164 times2:
+003D   0D27           00165     rlf     freqBy16_0, w
+003E   00AB           00166     movwf   freqh0
+003F   0D26           00167     rlf     freqBy16_1, w
+0040   00AA           00168     movwf   freqh1
+0041   0D25           00169     rlf     freqBy16_2, w
+0042   00A9           00170     movwf   freqh2
+Message[305]: Using default destination of 1 (file).
+0043   0DA8           00171     rlf     freqh3
+0044   0008           00172     return
+                      00173     
+                      00174 ; Convert freqh into bcd and store it in freqd
+                      00175 ; Taken from http://www.piclist.com/techref/member/BB-LTL-/index.htm
+0045                  00176 freqToBCD:
+0045   01AC           00177     clrf    freqd9      ; Clear previous value
+0046   01AD           00178     clrf    freqd8
+0047   01AE           00179     clrf    freqd7
+0048   01AF           00180     clrf    freqd6
+0049   01B0           00181     clrf    freqd5
+004A   01B1           00182     clrf    freqd4
+004B   01B2           00183     clrf    freqd3
+004C   01B3           00184     clrf    freqd2
+004D   01B4           00185     clrf    freqd1
+004E   01B5           00186     clrf    freqd0
+                      00187     ; Outer loop bit counter
+004F   3020           00188     movlw   D'32'       
+0050   00B6           00189     movwf   bitcnt      
+MPASM 5.76                   FREQCOUNTER.ASM   1-18-2018  12:02:37         PAGE  5
+
+
+LOC  OBJECT CODE     LINE SOURCE TEXT
+  VALUE
+
+0051                  00190 b2bcd1:
+                      00191     ; Shift 32bit bin acc left to put ms bit into carry
+0051   0DAB           00192     rlf     freqh0, f   
+0052   0DAA           00193     rlf     freqh1, f      
+0053   0DA9           00194     rlf     freqh2, f      
+0054   0DA8           00195     rlf     freqh3, f   
+                      00196     ; Point to address of ls bcd digit
+0055   3035           00197     movlw   freqd0      
+0056   0084           00198     movwf   FSR         
+                      00199     ; Inner loop digit coutner
+0057   300A           00200     movlw   D'10'
+0058   00B7           00201     movwf   digcnt
+0059                  00202 b2bcd2:
+                      00203     ; Shift carry into bcd digit
+0059   0D80           00204     rlf     INDF, f
+                      00205     ; Substract 10 from digit then check and adjust for decimal overflow
+005A   300A           00206     movlw   D'10'
+005B   0200           00207     subwf   INDF, w
+                      00208     ; If carry = 1 (result >= 0) adjust for decimal overflow
+005C   1803           00209     btfsc   STATUS, C
+005D   0080           00210     movwf   INDF
+                      00211     ; Point to next BCD digit
+005E   0384           00212     decf    FSR, f
+                      00213     ; Decrement digcnt, loop if > 0
+005F   0BB7           00214     decfsz  digcnt, f
+0060   2???           00215     goto    b2bcd2
+                      00216     ; Decrement bitcnt, loop if > 0
+0061   0BB6           00217     decfsz  bitcnt, f
+0062   2???           00218     goto    b2bcd1
+0063   3400           00219     retlw   0   
+                      00220 
+                      00221 ; Interrupt Service Routine    
+0064                  00222 isr:
+                      00223     bank0
+0064   1283               M         bcf STATUS, 5
+                      00224     ; Disable Int
+0065   138B           00225     bcf     INTCON, 7 
+                      00226     ; Context Save    
+0066   00A0           00227     movwf   w_tmp
+0067   0E03           00228     swapf   STATUS, w
+0068   00A1           00229     movwf   status_tmp
+                      00230     ; end Context Save
+                      00231     
+                      00232     ; ISR
+                      00233     ; Check if tmr0 overflowed
+0069   190B           00234     btfsc   INTCON, 2
+006A   2???           00235     call    stopCounting
+006B   180C           00236     btfsc   PIR1, 0
+006C   2???           00237     call    incTmr1Cntr
+                      00238     
+                      00239     ; Context Retrive
+006D   0E21           00240     swapf   status_tmp, w
+006E   0083           00241     movwf   STATUS
+MPASM 5.76                   FREQCOUNTER.ASM   1-18-2018  12:02:37         PAGE  6
+
+
+LOC  OBJECT CODE     LINE SOURCE TEXT
+  VALUE
+
+006F   0EA0           00242     swapf   w_tmp, f
+0070   0E20           00243     swapf   w_tmp, w
+                      00244     ; Return    
+0071   0009           00245     retfie
+                      00246     
+3FD4                  00247     end
+MPASM 5.76                   FREQCOUNTER.ASM   1-18-2018  12:02:37         PAGE  7
+
+
+SYMBOL TABLE
+  LABEL                             VALUE 
+
+ADCON0                            0000001F
+ADCS0                             00000004
+ADCS1                             00000005
+ADCS2                             00000006
+ADFM                              00000007
+ADIE                              00000006
+ADIF                              00000006
+ADON                              00000000
+ADRESH                            0000001E
+ADRESL                            0000009E
+ANS0                              00000000
+ANS1                              00000001
+ANS2                              00000002
+ANS3                              00000003
+ANSEL                             0000009F
+C                                 00000000
+CAL0                              00000002
+CAL1                              00000003
+CAL2                              00000004
+CAL3                              00000005
+CAL4                              00000006
+CAL5                              00000007
+CHS0                              00000002
+CHS1                              00000003
+CINV                              00000004
+CIS                               00000003
+CM0                               00000000
+CM1                               00000001
+CM2                               00000002
+CMCON                             00000019
+CMIE                              00000003
+CMIF                              00000003
+COUT                              00000006
+DC                                00000001
+EEADR                             0000009B
+EECON1                            0000009C
+EECON2                            0000009D
+EEDAT                             0000009A
+EEDATA                            0000009A
+EEIE                              00000007
+EEIF                              00000007
+F                                 00000001
+FSR                               00000004
+GIE                               00000007
+GO                                00000001
+GO_DONE                           00000001
+GO_NOT_DONE                       00000001
+GP0                               00000000
+GP1                               00000001
+GP2                               00000002
+GP3                               00000003
+GP4                               00000004
+GP5                               00000005
+MPASM 5.76                   FREQCOUNTER.ASM   1-18-2018  12:02:37         PAGE  8
+
+
+SYMBOL TABLE
+  LABEL                             VALUE 
+
+GPIE                              00000003
+GPIF                              00000000
+GPIO                              00000005
+GPIO0                             00000000
+GPIO1                             00000001
+GPIO2                             00000002
+GPIO3                             00000003
+GPIO4                             00000004
+GPIO5                             00000005
+INDF                              00000000
+INTCON                            0000000B
+INTE                              00000004
+INTEDG                            00000006
+INTF                              00000001
+IOC                               00000096
+IOC0                              00000000
+IOC1                              00000001
+IOC2                              00000002
+IOC3                              00000003
+IOC4                              00000004
+IOC5                              00000005
+IOCB                              00000096
+IOCB0                             00000000
+IOCB1                             00000001
+IOCB2                             00000002
+IOCB3                             00000003
+IOCB4                             00000004
+IOCB5                             00000005
+IRP                               00000007
+NOT_BOD                           00000000
+NOT_BOR                           00000000
+NOT_DONE                          00000001
+NOT_GPPU                          00000007
+NOT_PD                            00000003
+NOT_POR                           00000001
+NOT_T1SYNC                        00000002
+NOT_TO                            00000004
+OPTION_REG                        00000081
+OSCCAL                            00000090
+PCL                               00000002
+PCLATH                            0000000A
+PCON                              0000008E
+PEIE                              00000006
+PIE1                              0000008C
+PIR1                              0000000C
+PS0                               00000000
+PS1                               00000001
+PS2                               00000002
+PSA                               00000003
+RD                                00000000
+RP0                               00000005
+RP1                               00000006
+STATUS                            00000003
+MPASM 5.76                   FREQCOUNTER.ASM   1-18-2018  12:02:37         PAGE  9
+
+
+SYMBOL TABLE
+  LABEL                             VALUE 
+
+T0CS                              00000005
+T0IE                              00000005
+T0IF                              00000002
+T0SE                              00000004
+T1CKPS0                           00000004
+T1CKPS1                           00000005
+T1CON                             00000010
+T1IE                              00000000
+T1IF                              00000000
+T1OSCEN                           00000003
+TMR0                              00000001
+TMR0IE                            00000005
+TMR0IF                            00000002
+TMR1                              0000000E
+TMR1CS                            00000001
+TMR1GE                            00000006
+TMR1H                             0000000F
+TMR1IE                            00000000
+TMR1IF                            00000000
+TMR1L                             0000000E
+TMR1ON                            00000000
+TRISIO                            00000085
+TRISIO0                           00000000
+TRISIO1                           00000001
+TRISIO2                           00000002
+TRISIO3                           00000003
+TRISIO4                           00000004
+TRISIO5                           00000005
+VCFG                              00000006
+VR0                               00000000
+VR1                               00000001
+VR2                               00000002
+VR3                               00000003
+VRCON                             00000099
+VREN                              00000007
+VRR                               00000005
+W                                 00000000
+WPU                               00000095
+WPU0                              00000000
+WPU1                              00000001
+WPU2                              00000002
+WPU4                              00000004
+WPU5                              00000005
+WR                                00000001
+WREN                              00000002
+WRERR                             00000003
+Z                                 00000002
+_BODEN_OFF                        00003FBF
+_BODEN_ON                         00003FFF
+_BOREN_OFF                        00003FBF
+_BOREN_ON                         00003FFF
+_CONFIG                           00002007
+_CPD_OFF                          00003FFF
+MPASM 5.76                   FREQCOUNTER.ASM   1-18-2018  12:02:37         PAGE 10
+
+
+SYMBOL TABLE
+  LABEL                             VALUE 
+
+_CPD_ON                           00003EFF
+_CP_OFF                           00003FFF
+_CP_ON                            00003F7F
+_DEVID1                           00002006
+_EC_OSC                           00003FFB
+_EXTRC_OSC_CLKOUT                 00003FFF
+_EXTRC_OSC_NOCLKOUT               00003FFE
+_FOSC_EC                          00003FFB
+_FOSC_EXTRCCLK                    00003FFF
+_FOSC_EXTRCIO                     00003FFE
+_FOSC_HS                          00003FFA
+_FOSC_INTRCCLK                    00003FFD
+_FOSC_INTRCIO                     00003FFC
+_FOSC_LP                          00003FF8
+_FOSC_XT                          00003FF9
+_HS_OSC                           00003FFA
+_IDLOC0                           00002000
+_IDLOC1                           00002001
+_IDLOC2                           00002002
+_IDLOC3                           00002003
+_INTRC_OSC_CLKOUT                 00003FFD
+_INTRC_OSC_NOCLKOUT               00003FFC
+_LP_OSC                           00003FF8
+_MCLRE_OFF                        00003FDF
+_MCLRE_ON                         00003FFF
+_PWRTE_OFF                        00003FFF
+_PWRTE_ON                         00003FEF
+_WDTE_OFF                         00003FF7
+_WDTE_ON                          00003FFF
+_WDT_OFF                          00003FF7
+_WDT_ON                           00003FFF
+_XT_OSC                           00003FF9
+__12F675                          00000001
+__DEBUG                           
+__MPLAB_DEBUGGER_SIMULATOR        1
+b2bcd1                            00000051
+b2bcd2                            00000059
+bank0                             
+bank1                             
+bitcnt                            00000036
+counting_flag                     00000023
+digcnt                            00000037
+freqBy16_0                        00000027
+freqBy16_1                        00000026
+freqBy16_2                        00000025
+freqInput                         GPIO, 5
+freqToBCD                         00000045
+freqd0                            00000035
+freqd1                            00000034
+freqd2                            00000033
+freqd3                            00000032
+freqd4                            00000031
+freqd5                            00000030
+MPASM 5.76                   FREQCOUNTER.ASM   1-18-2018  12:02:37         PAGE 11
+
+
+SYMBOL TABLE
+  LABEL                             VALUE 
+
+freqd6                            0000002F
+freqd7                            0000002E
+freqd8                            0000002D
+freqd9                            0000002C
+freqh0                            0000002B
+freqh1                            0000002A
+freqh2                            00000029
+freqh3                            00000028
+getFreq                           00000034
+incTmr1Cntr                       00000030
+init                              0000000C
+isr                               00000064
+lcdClk                            GPIO, 1
+lcdData                           GPIO, 0
+lcdEn                             GPIO, 2
+range_err_flag                    00000024
+repeat                            00000007
+start                             00000005
+startCounting                     00000018
+status_tmp                        00000021
+stopCounting                      00000024
+times2                            0000003D
+tmr1_counter                      00000022
+w_tmp                             00000020
+
+Errors   :     0
+Warnings :     0 reported,     0 suppressed
+Messages :     7 reported,     0 suppressed
+
+

@@ -98,7 +98,11 @@ ${OBJECTDIR}/freqcounter.o: freqcounter.asm  nbproject/Makefile-${CND_CONF}.mk
 	@${MKDIR} "${OBJECTDIR}" 
 	@${RM} ${OBJECTDIR}/freqcounter.o.d 
 	@${RM} ${OBJECTDIR}/freqcounter.o 
-	@${FIXDEPS} dummy.d -e "${OBJECTDIR}/freqcounter.err" $(SILENT) -c ${MP_AS} $(MP_EXTRA_AS_PRE) -d__DEBUG -d__MPLAB_DEBUGGER_SIMULATOR=1 -q -p$(MP_PROCESSOR_OPTION)  -l\"${OBJECTDIR}/freqcounter.lst\" -e\"${OBJECTDIR}/freqcounter.err\" $(ASM_OPTIONS)    -o\"${OBJECTDIR}/freqcounter.o\" \"freqcounter.asm\" 
+	@${FIXDEPS} dummy.d -e "C:/Users/Ashwin/workspace/MPLABXProjects/FreqCounter.X/freqcounter.ERR" $(SILENT) -c ${MP_AS} $(MP_EXTRA_AS_PRE) -d__DEBUG -d__MPLAB_DEBUGGER_SIMULATOR=1 -q -p$(MP_PROCESSOR_OPTION)  $(ASM_OPTIONS)    \"C:/Users/Ashwin/workspace/MPLABXProjects/FreqCounter.X/freqcounter.asm\" 
+	@${MV}  C:/Users/Ashwin/workspace/MPLABXProjects/FreqCounter.X/freqcounter.O ${OBJECTDIR}/freqcounter.o
+	@${MV}  C:/Users/Ashwin/workspace/MPLABXProjects/FreqCounter.X/freqcounter.ERR ${OBJECTDIR}/freqcounter.o.err
+	@${MV}  C:/Users/Ashwin/workspace/MPLABXProjects/FreqCounter.X/freqcounter.LST ${OBJECTDIR}/freqcounter.o.lst
+	@${RM}  C:/Users/Ashwin/workspace/MPLABXProjects/FreqCounter.X/freqcounter.HEX 
 	@${DEP_GEN} -d "${OBJECTDIR}/freqcounter.o"
 	@${FIXDEPS} "${OBJECTDIR}/freqcounter.o.d" $(SILENT) -rsi ${MP_AS_DIR} -c18 
 	
@@ -107,7 +111,11 @@ ${OBJECTDIR}/freqcounter.o: freqcounter.asm  nbproject/Makefile-${CND_CONF}.mk
 	@${MKDIR} "${OBJECTDIR}" 
 	@${RM} ${OBJECTDIR}/freqcounter.o.d 
 	@${RM} ${OBJECTDIR}/freqcounter.o 
-	@${FIXDEPS} dummy.d -e "${OBJECTDIR}/freqcounter.err" $(SILENT) -c ${MP_AS} $(MP_EXTRA_AS_PRE) -q -p$(MP_PROCESSOR_OPTION)  -l\"${OBJECTDIR}/freqcounter.lst\" -e\"${OBJECTDIR}/freqcounter.err\" $(ASM_OPTIONS)    -o\"${OBJECTDIR}/freqcounter.o\" \"freqcounter.asm\" 
+	@${FIXDEPS} dummy.d -e "C:/Users/Ashwin/workspace/MPLABXProjects/FreqCounter.X/freqcounter.ERR" $(SILENT) -c ${MP_AS} $(MP_EXTRA_AS_PRE) -q -p$(MP_PROCESSOR_OPTION)  $(ASM_OPTIONS)    \"C:/Users/Ashwin/workspace/MPLABXProjects/FreqCounter.X/freqcounter.asm\" 
+	@${MV}  C:/Users/Ashwin/workspace/MPLABXProjects/FreqCounter.X/freqcounter.O ${OBJECTDIR}/freqcounter.o
+	@${MV}  C:/Users/Ashwin/workspace/MPLABXProjects/FreqCounter.X/freqcounter.ERR ${OBJECTDIR}/freqcounter.o.err
+	@${MV}  C:/Users/Ashwin/workspace/MPLABXProjects/FreqCounter.X/freqcounter.LST ${OBJECTDIR}/freqcounter.o.lst
+	@${RM}  C:/Users/Ashwin/workspace/MPLABXProjects/FreqCounter.X/freqcounter.HEX 
 	@${DEP_GEN} -d "${OBJECTDIR}/freqcounter.o"
 	@${FIXDEPS} "${OBJECTDIR}/freqcounter.o.d" $(SILENT) -rsi ${MP_AS_DIR} -c18 
 	

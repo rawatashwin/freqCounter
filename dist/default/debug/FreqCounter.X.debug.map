@@ -1,58 +1,58 @@
 MPLINK 5.08, LINKER
-Linker Map File - Created Mon Jan 15 23:12:47 2018
+Linker Map File - Created Thu Jan 18 13:31:37 2018
 
                                  Section Info
                   Section       Type    Address   Location Size(Bytes)
                 ---------  ---------  ---------  ---------  ---------
-                   .org_0       code   0x000000    program   0x000002
-                   .cinit    romdata   0x000001    program   0x000004
-                   .org_1       code   0x000004    program   0x0000dc
-.config_2007_BUILD/DEFAULT/DEBUG/_EXT/2057970       code   0x002007    program   0x000002
+                   .org_0       code   0x000000    program   0x000000
+                   .org_1       code   0x000000    program   0x000002
+                   .org_2       code   0x000004    program   0x0000da
+.config_2007_FREQCOUNTER.O       code   0x002007    program   0x000002
 
 
 
                               Program Memory Usage 
                                Start         End      
                            ---------   ---------      
-                            0x000000    0x000002      
-                            0x000004    0x000071      
+                            0x000000    0x000000      
+                            0x000004    0x000070      
                             0x002007    0x002007      
-            114 out of 1158 program addresses used, program memory utilization is 9%
+            111 out of 1158 program addresses used, program memory utilization is 9%
 
 
 
                               Symbols - Sorted by Name
                      Name    Address   Location    Storage File                     
                 ---------  ---------  ---------  --------- ---------                
-                   b2bcd1   0x000051    program     static ..\..\..\Documents\Workspace\freqcounter.asm
-                   b2bcd2   0x000059    program     static ..\..\..\Documents\Workspace\freqcounter.asm
-                freqToBCD   0x000045    program     static ..\..\..\Documents\Workspace\freqcounter.asm
-                  getFreq   0x000034    program     static ..\..\..\Documents\Workspace\freqcounter.asm
-              incTmr1Cntr   0x000030    program     static ..\..\..\Documents\Workspace\freqcounter.asm
-                     init   0x00000c    program     static ..\..\..\Documents\Workspace\freqcounter.asm
-                      isr   0x000064    program     static ..\..\..\Documents\Workspace\freqcounter.asm
-                   repeat   0x000007    program     static ..\..\..\Documents\Workspace\freqcounter.asm
-                    start   0x000005    program     static ..\..\..\Documents\Workspace\freqcounter.asm
-            startCounting   0x000018    program     static ..\..\..\Documents\Workspace\freqcounter.asm
-             stopCounting   0x000024    program     static ..\..\..\Documents\Workspace\freqcounter.asm
-                   times2   0x00003d    program     static ..\..\..\Documents\Workspace\freqcounter.asm
+                   b2bcd1   0x000050    program     static C:\Users\Ashwin\workspace\MPLABXProjects\FreqCounter.X\freqcounter.asm
+                   b2bcd2   0x000058    program     static C:\Users\Ashwin\workspace\MPLABXProjects\FreqCounter.X\freqcounter.asm
+                freqToBCD   0x000044    program     static C:\Users\Ashwin\workspace\MPLABXProjects\FreqCounter.X\freqcounter.asm
+                  getFreq   0x000033    program     static C:\Users\Ashwin\workspace\MPLABXProjects\FreqCounter.X\freqcounter.asm
+              incTmr1Cntr   0x00002f    program     static C:\Users\Ashwin\workspace\MPLABXProjects\FreqCounter.X\freqcounter.asm
+                     init   0x00000c    program     static C:\Users\Ashwin\workspace\MPLABXProjects\FreqCounter.X\freqcounter.asm
+                      isr   0x000063    program     static C:\Users\Ashwin\workspace\MPLABXProjects\FreqCounter.X\freqcounter.asm
+                   repeat   0x000007    program     static C:\Users\Ashwin\workspace\MPLABXProjects\FreqCounter.X\freqcounter.asm
+                    start   0x000005    program     static C:\Users\Ashwin\workspace\MPLABXProjects\FreqCounter.X\freqcounter.asm
+            startCounting   0x000017    program     static C:\Users\Ashwin\workspace\MPLABXProjects\FreqCounter.X\freqcounter.asm
+             stopCounting   0x000023    program     static C:\Users\Ashwin\workspace\MPLABXProjects\FreqCounter.X\freqcounter.asm
+                   times2   0x00003c    program     static C:\Users\Ashwin\workspace\MPLABXProjects\FreqCounter.X\freqcounter.asm
 
 
 
                               Symbols - Sorted by Address
                      Name    Address   Location    Storage File                     
                 ---------  ---------  ---------  --------- ---------                
-                    start   0x000005    program     static ..\..\..\Documents\Workspace\freqcounter.asm
-                   repeat   0x000007    program     static ..\..\..\Documents\Workspace\freqcounter.asm
-                     init   0x00000c    program     static ..\..\..\Documents\Workspace\freqcounter.asm
-            startCounting   0x000018    program     static ..\..\..\Documents\Workspace\freqcounter.asm
-             stopCounting   0x000024    program     static ..\..\..\Documents\Workspace\freqcounter.asm
-              incTmr1Cntr   0x000030    program     static ..\..\..\Documents\Workspace\freqcounter.asm
-                  getFreq   0x000034    program     static ..\..\..\Documents\Workspace\freqcounter.asm
-                   times2   0x00003d    program     static ..\..\..\Documents\Workspace\freqcounter.asm
-                freqToBCD   0x000045    program     static ..\..\..\Documents\Workspace\freqcounter.asm
-                   b2bcd1   0x000051    program     static ..\..\..\Documents\Workspace\freqcounter.asm
-                   b2bcd2   0x000059    program     static ..\..\..\Documents\Workspace\freqcounter.asm
-                      isr   0x000064    program     static ..\..\..\Documents\Workspace\freqcounter.asm
+                    start   0x000005    program     static C:\Users\Ashwin\workspace\MPLABXProjects\FreqCounter.X\freqcounter.asm
+                   repeat   0x000007    program     static C:\Users\Ashwin\workspace\MPLABXProjects\FreqCounter.X\freqcounter.asm
+                     init   0x00000c    program     static C:\Users\Ashwin\workspace\MPLABXProjects\FreqCounter.X\freqcounter.asm
+            startCounting   0x000017    program     static C:\Users\Ashwin\workspace\MPLABXProjects\FreqCounter.X\freqcounter.asm
+             stopCounting   0x000023    program     static C:\Users\Ashwin\workspace\MPLABXProjects\FreqCounter.X\freqcounter.asm
+              incTmr1Cntr   0x00002f    program     static C:\Users\Ashwin\workspace\MPLABXProjects\FreqCounter.X\freqcounter.asm
+                  getFreq   0x000033    program     static C:\Users\Ashwin\workspace\MPLABXProjects\FreqCounter.X\freqcounter.asm
+                   times2   0x00003c    program     static C:\Users\Ashwin\workspace\MPLABXProjects\FreqCounter.X\freqcounter.asm
+                freqToBCD   0x000044    program     static C:\Users\Ashwin\workspace\MPLABXProjects\FreqCounter.X\freqcounter.asm
+                   b2bcd1   0x000050    program     static C:\Users\Ashwin\workspace\MPLABXProjects\FreqCounter.X\freqcounter.asm
+                   b2bcd2   0x000058    program     static C:\Users\Ashwin\workspace\MPLABXProjects\FreqCounter.X\freqcounter.asm
+                      isr   0x000063    program     static C:\Users\Ashwin\workspace\MPLABXProjects\FreqCounter.X\freqcounter.asm
 
 
