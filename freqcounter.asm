@@ -54,6 +54,7 @@
 	
 	; Lcd
 	lcd_data
+	lcd_tmp
     endc
 
 ; Bank Switching macros
@@ -239,10 +240,111 @@ b2bcd2:
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;   LCD Code              ;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;
+; LCD connected in 4 bit mode through 74hc595
+; LCD DB7:DB4 connected to QA:QD
+; LCD RS connected to QH
     
-lcd_send_cmd:
+    ; Some macros to help with lcd
+    lcd_shift_out	macro
+    bcf	    STATUS, C
+    rrf	    lcd_tmp
+    btfsc   STATUS, C
+    bsf	    lcdData
+    btfss   STATUS, C
+    bcf	    lcdData
+    bsf	    lcdClk
+    nop
+    bcf	    lcdClk     
+    nop
+    endm
     
+    lcd_send_0  macro
+    bcf	    lcdData
+    bsf	    lcdClk
+    nop
+    bcf	    lcdClk
+    nop
+    endm
     
+    lcd_send_1  macro
+    bsf	    lcdData
+    bsf	    lcdClk
+    nop
+    bcf	    lcdClk   
+    nop
+    endm    
+    
+lcd_send_cmd:	; Sends word in lcd_data to lcd
+    ; Send higher nibble
+    swapf   lcd_data, w
+    movwf   lcd_tmp
+    ; Shift out 4 (higher) bits
+    lcd_shift_out
+    lcd_shift_out
+    lcd_shift_out
+    lcd_shift_out
+    ; Send 3 0s
+    lcd_send_0
+    lcd_send_0
+    lcd_send_0
+    ; Send 0 for selecting lcd command register
+    lcd_send_0
+    ; Couple of nops to adjust for lcd latency
+    nop
+    nop
+    nop
+    nop
+    nop
+    ; Send lcd EN
+    bsf	    lcdEn
+    nop
+    nop
+    nop
+    nop
+    nop
+    bcf	    lcdEn
+    nop
+    nop
+    nop
+    nop
+    nop
+    return
+    
+lcd_send_data:	; Sends word in lcd_data to lcd
+    ; Send higher nibble
+    swapf   lcd_data, w
+    movwf   lcd_tmp
+    ; Shift out 4 (higher) bits
+    lcd_shift_out
+    lcd_shift_out
+    lcd_shift_out
+    lcd_shift_out
+    ; Send 3 0s
+    lcd_send_0
+    lcd_send_0
+    lcd_send_0
+    ; Send 0 for selecting lcd command register
+    lcd_send_1
+    ; Couple of nops to adjust for lcd latency
+    nop
+    nop
+    nop
+    nop
+    nop
+    ; Send lcd EN
+    bsf	    lcdEn
+    nop
+    nop
+    nop
+    nop
+    nop
+    bcf	    lcdEn
+    nop
+    nop
+    nop
+    nop
+    nop
+    return    
     
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ; Interrupt Service Routine;    

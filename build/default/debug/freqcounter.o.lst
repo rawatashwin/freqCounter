@@ -1,4 +1,4 @@
-MPASM 5.76                   FREQCOUNTER.ASM   1-18-2018  13:31:36         PAGE  1
+MPASM 5.76                   FREQCOUNTER.ASM   1-18-2018  16:14:09         PAGE  1
 
 
 LOC  OBJECT CODE     LINE SOURCE TEXT
@@ -57,7 +57,7 @@ LOC  OBJECT CODE     LINE SOURCE TEXT
                       00041         ; Frequency in bcd
   0000002C            00042         freqd9
   0000002D            00043         freqd8
-MPASM 5.76                   FREQCOUNTER.ASM   1-18-2018  13:31:36         PAGE  2
+MPASM 5.76                   FREQCOUNTER.ASM   1-18-2018  16:14:09         PAGE  2
 
 
 LOC  OBJECT CODE     LINE SOURCE TEXT
@@ -73,263 +73,530 @@ LOC  OBJECT CODE     LINE SOURCE TEXT
   00000035            00051         freqd0
   00000036            00052         bitcnt  
   00000037            00053         digcnt
-                      00054     endc
-                      00055 
-                      00056 ; Bank Switching macros
-                      00057 bank0   macro
-                      00058         bcf STATUS, 5
-                      00059         endm
-                      00060         
-                      00061 bank1   macro
-                      00062         bsf STATUS, 5
+                      00054         
+                      00055         ; Lcd
+  00000038            00056         lcd_data
+  00000039            00057         lcd_tmp
+                      00058     endc
+                      00059 
+                      00060 ; Bank Switching macros
+                      00061 bank0   macro
+                      00062         bcf STATUS, 5
                       00063         endm
                       00064         
-                      00065 ; Reset Vector
-0000                  00066     org     0x00
-0000   2805           00067     goto    start
-0004                  00068     org     0x04
-0004   2863           00069     goto    isr
-                      00070     
-                      00071 ; Start
-0005                  00072 start:
-0005   200C           00073     call    init
-0006   2007           00074     call    repeat
-                      00075 
-                      00076 ; Loop
-0007                  00077 repeat:
-                      00078     ; Skip if still counting
-0007   1C23           00079     btfss   counting_flag, 0
-0008   2017           00080     call    startCounting
-                      00081     ; FreqBy16 to Freqh
-0009   2033           00082     call    getFreq
-                      00083     ; Get Freq in BCD from Freqh
-000A   2044           00084     call    freqToBCD
-                      00085     ; Display on lcd
-000B   2807           00086     goto    repeat
-                      00087     
-000C                  00088 init:
-                      00089     ; Setup GPIO
-                      00090     ; ANSEL
-                      00091     bank1
+                      00065 bank1   macro
+                      00066         bsf STATUS, 5
+                      00067         endm
+                      00068         
+                      00069 ; Reset Vector
+0000                  00070     org     0x00
+0000   2805           00071     goto    start
+0004                  00072     org     0x04
+0004   2903           00073     goto    isr
+                      00074     
+                      00075 ; Start
+0005                  00076 start:
+0005   200C           00077     call    init
+0006   2007           00078     call    repeat
+                      00079 
+                      00080 ; Loop
+0007                  00081 repeat:
+                      00082     ; Skip if still counting
+0007   1C23           00083     btfss   counting_flag, 0
+0008   2017           00084     call    startCounting
+                      00085     ; FreqBy16 to Freqh
+0009   2033           00086     call    getFreq
+                      00087     ; Get Freq in BCD from Freqh
+000A   2044           00088     call    freqToBCD
+                      00089     ; Display on lcd
+000B   2807           00090     goto    repeat
+                      00091     
+000C                  00092 init:
+                      00093     ; Setup GPIO
+                      00094     ; ANSEL
+                      00095     bank1
 000C   1683               M         bsf STATUS, 5
-Message[302]: Register in operand not in bank 0.  Ensure that bank bits are correct.
-000D   019F           00092     clrf    ANSEL
-                      00093     
-                      00094     ; TRISIO
-MPASM 5.76                   FREQCOUNTER.ASM   1-18-2018  13:31:36         PAGE  3
+MPASM 5.76                   FREQCOUNTER.ASM   1-18-2018  16:14:09         PAGE  3
 
 
 LOC  OBJECT CODE     LINE SOURCE TEXT
   VALUE
 
-000E   302F           00095     movlw   b'00101111'
 Message[302]: Register in operand not in bank 0.  Ensure that bank bits are correct.
-000F   0085           00096     movwf   TRISIO
+000D   019F           00096     clrf    ANSEL
                       00097     
-                      00098     bank0
+                      00098     ; TRISIO
+000E   302F           00099     movlw   b'00101111'
+Message[302]: Register in operand not in bank 0.  Ensure that bank bits are correct.
+000F   0085           00100     movwf   TRISIO
+                      00101     
+                      00102     bank0
 0010   1283               M         bcf STATUS, 5
-                      00099     ; Setup timer1 as counter to count pulses on pin 2
-0011   3036           00100     movlw   b'00110110' ; Async counter with 1/8 prescaler
-0012   0090           00101     movwf   T1CON
-                      00102     
-                      00103     ; Setup timer0 
-0013   3007           00104     movlw   b'00000111' ; Count system clock with prescler 256
-                      00105     bank0  
+                      00103     ; Setup timer1 as counter to count pulses on pin 2
+0011   3036           00104     movlw   b'00110110' ; Async counter with 1/8 prescaler
+0012   0090           00105     movwf   T1CON
+                      00106     
+                      00107     ; Setup timer0 
+0013   3007           00108     movlw   b'00000111' ; Count system clock with prescler 256
+                      00109     bank0  
 0014   1283               M         bcf STATUS, 5
 Message[302]: Register in operand not in bank 0.  Ensure that bank bits are correct.
-0015   0081           00106     movwf   OPTION_REG
-                      00107     
-                      00108     ; Setup LCD
-                      00109     
-0016   0008           00110     return
+0015   0081           00110     movwf   OPTION_REG
                       00111     
-0017                  00112 startCounting:
-                      00113     ; Get number of pulses in 62.5ms and multiply by 16 (62.5ms * 16 = 1s) to get freq in Hz
-                      00114     ; Setup Interrupts
-                      00115     bank1
+                      00112     ; Setup LCD
+                      00113     
+0016   0008           00114     return
+                      00115     
+0017                  00116 startCounting:
+                      00117     ; Get number of pulses in 62.5ms and multiply by 16 (62.5ms * 16 = 1s) to get freq in Hz
+                      00118     ; Setup Interrupts
+                      00119     bank1
 0017   1683               M         bsf STATUS, 5
-                      00116     ; Timer1 Int enable
+                      00120     ; Timer1 Int enable
 Message[302]: Register in operand not in bank 0.  Ensure that bank bits are correct.
-0018   140C           00117     bsf     PIE1, 0 
-                      00118     bank0
+0018   140C           00121     bsf     PIE1, 0 
+                      00122     bank0
 0019   1283               M         bcf STATUS, 5
-                      00119     ; Clear tmr1_counter
-001A   01A2           00120     clrf    tmr1_counter
-                      00121     ; Set Counting Flag
-001B   1423           00122     bsf     counting_flag, 0
-                      00123     ; Peripheral Int enable
-001C   170B           00124     bsf     INTCON, 6 
-                      00125     ; Tmr0 Int enable
-001D   168B           00126     bsf     INTCON, 5 
-                      00127     ; Setup timer0 for 62.5ms
-001E   300C           00128     movlw   0x0c   
-001F   0081           00129     movwf   TMR0
-                      00130     ; Start timer1
-0020   1410           00131     bsf     T1CON, 0
-                      00132     ; Enable Int
-0021   178B           00133     bsf     INTCON, 7
-0022   0008           00134     return
-                      00135     
-0023                  00136 stopCounting:
-                      00137     ; Stop timer0 Int
-0023   128B           00138     bcf     INTCON, 5
-                      00139     ; Stop timer1
-0024   1010           00140     bcf     T1CON, 0
-MPASM 5.76                   FREQCOUNTER.ASM   1-18-2018  13:31:36         PAGE  4
+                      00123     ; Clear tmr1_counter
+001A   01A2           00124     clrf    tmr1_counter
+                      00125     ; Set Counting Flag
+001B   1423           00126     bsf     counting_flag, 0
+                      00127     ; Peripheral Int enable
+001C   170B           00128     bsf     INTCON, 6 
+                      00129     ; Tmr0 Int enable
+001D   168B           00130     bsf     INTCON, 5 
+                      00131     ; Setup timer0 for 62.5ms
+001E   300C           00132     movlw   0x0c   
+001F   0081           00133     movwf   TMR0
+                      00134     ; Start timer1
+0020   1410           00135     bsf     T1CON, 0
+                      00136     ; Enable Int
+0021   178B           00137     bsf     INTCON, 7
+0022   0008           00138     return
+                      00139     
+0023                  00140 stopCounting:
+MPASM 5.76                   FREQCOUNTER.ASM   1-18-2018  16:14:09         PAGE  4
 
 
 LOC  OBJECT CODE     LINE SOURCE TEXT
   VALUE
 
-                      00141     ; Reset T0IF
-0025   110B           00142     bcf     INTCON, 2
-                      00143     ; Reset TMR1IF
-0026   100C           00144     bcf     PIR1, 0
-                      00145     ; Reset counting flag
-0027   1023           00146     bcf     counting_flag, 0
-                      00147     ; Put TMR1 into freqBy16
-0028   080E           00148     movf    TMR1L, w
-0029   00A7           00149     movwf   freqBy16_0
-002A   080F           00150     movf    TMR1H, w
-002B   00A6           00151     movwf   freqBy16_1
+                      00141     ; Stop timer0 Int
+0023   128B           00142     bcf     INTCON, 5
+                      00143     ; Stop timer1
+0024   1010           00144     bcf     T1CON, 0
+                      00145     ; Reset T0IF
+0025   110B           00146     bcf     INTCON, 2
+                      00147     ; Reset TMR1IF
+0026   100C           00148     bcf     PIR1, 0
+                      00149     ; Reset counting flag
+0027   1023           00150     bcf     counting_flag, 0
+                      00151     ; Put TMR1 into freqBy16
+0028   080E           00152     movf    TMR1L, w
+0029   00A7           00153     movwf   freqBy16_0
+002A   080F           00154     movf    TMR1H, w
+002B   00A6           00155     movwf   freqBy16_1
 Message[305]: Using default destination of 1 (file).
-002C   08A2           00152     movf    tmr1_counter
-002D   00A5           00153     movwf   freqBy16_2
-002E   0008           00154     return
-                      00155     
-002F                  00156 incTmr1Cntr:
+002C   08A2           00156     movf    tmr1_counter
+002D   00A5           00157     movwf   freqBy16_2
+002E   0008           00158     return
+                      00159     
+002F                  00160 incTmr1Cntr:
 Message[305]: Using default destination of 1 (file).
-002F   0FA2           00157     incfsz  tmr1_counter
-0030   0008           00158     return
-0031   1424           00159     bsf     range_err_flag, 0
-0032   0008           00160     return
-                      00161     
-                      00162 ;;;;;;;;;;;;;;;;;;;;;;;;;;;
-                      00163 ;   Frequency  conversion ;
-                      00164 ;;;;;;;;;;;;;;;;;;;;;;;;;;; 
-                      00165    
-0033                  00166 getFreq:
-0033   01AB           00167     clrf    freqh0
-0034   01AA           00168     clrf    freqh1
-0035   01A9           00169     clrf    freqh2
-0036   01A8           00170     clrf    freqh3
-                      00171     
-                      00172     ; Multiply Freq by 2*2*2*2
-0037   203C           00173     call    times2
-0038   203C           00174     call    times2
-0039   203C           00175     call    times2
-003A   203C           00176     call    times2
-003B   0008           00177     return    
-003C                  00178 times2:
-003C   0D27           00179     rlf     freqBy16_0, w
-003D   00AB           00180     movwf   freqh0
-003E   0D26           00181     rlf     freqBy16_1, w
-003F   00AA           00182     movwf   freqh1
-0040   0D25           00183     rlf     freqBy16_2, w
-0041   00A9           00184     movwf   freqh2
+002F   0FA2           00161     incfsz  tmr1_counter
+0030   0008           00162     return
+0031   1424           00163     bsf     range_err_flag, 0
+0032   0008           00164     return
+                      00165     
+                      00166 ;;;;;;;;;;;;;;;;;;;;;;;;;;;
+                      00167 ;   Frequency  conversion ;
+                      00168 ;;;;;;;;;;;;;;;;;;;;;;;;;;; 
+                      00169    
+0033                  00170 getFreq:
+0033   01AB           00171     clrf    freqh0
+0034   01AA           00172     clrf    freqh1
+0035   01A9           00173     clrf    freqh2
+0036   01A8           00174     clrf    freqh3
+                      00175     
+                      00176     ; Multiply Freq by 2*2*2*2
+0037   203C           00177     call    times2
+0038   203C           00178     call    times2
+0039   203C           00179     call    times2
+003A   203C           00180     call    times2
+003B   0008           00181     return    
+003C                  00182 times2:
+003C   0D27           00183     rlf     freqBy16_0, w
+003D   00AB           00184     movwf   freqh0
+003E   0D26           00185     rlf     freqBy16_1, w
+003F   00AA           00186     movwf   freqh1
+0040   0D25           00187     rlf     freqBy16_2, w
+0041   00A9           00188     movwf   freqh2
 Message[305]: Using default destination of 1 (file).
-0042   0DA8           00185     rlf     freqh3
-0043   0008           00186     return
-                      00187         
-                      00188 ; Convert freqh into bcd and store it in freqd
-                      00189 ; Taken from http://www.piclist.com/techref/member/BB-LTL-/index.htm
-0044                  00190 freqToBCD:
-MPASM 5.76                   FREQCOUNTER.ASM   1-18-2018  13:31:36         PAGE  5
+0042   0DA8           00189     rlf     freqh3
+0043   0008           00190     return
+MPASM 5.76                   FREQCOUNTER.ASM   1-18-2018  16:14:09         PAGE  5
 
 
 LOC  OBJECT CODE     LINE SOURCE TEXT
   VALUE
 
-0044   01AC           00191     clrf    freqd9      ; Clear previous value
-0045   01AD           00192     clrf    freqd8
-0046   01AE           00193     clrf    freqd7
-0047   01AF           00194     clrf    freqd6
-0048   01B0           00195     clrf    freqd5
-0049   01B1           00196     clrf    freqd4
-004A   01B2           00197     clrf    freqd3
-004B   01B3           00198     clrf    freqd2
-004C   01B4           00199     clrf    freqd1
-004D   01B5           00200     clrf    freqd0
-                      00201     ; Outer loop bit counter
-004E   3020           00202     movlw   D'32'       
-004F   00B6           00203     movwf   bitcnt      
-0050                  00204 b2bcd1:
-                      00205     ; Shift 32bit bin acc left to put ms bit into carry
-0050   0DAB           00206     rlf     freqh0, f   
-0051   0DAA           00207     rlf     freqh1, f      
-0052   0DA9           00208     rlf     freqh2, f      
-0053   0DA8           00209     rlf     freqh3, f   
-                      00210     ; Point to address of ls bcd digit
-0054   3035           00211     movlw   freqd0      
-0055   0084           00212     movwf   FSR         
-                      00213     ; Inner loop digit coutner
-0056   300A           00214     movlw   D'10'
-0057   00B7           00215     movwf   digcnt
-0058                  00216 b2bcd2:
-                      00217     ; Shift carry into bcd digit
-0058   0D80           00218     rlf     INDF, f
-                      00219     ; Substract 10 from digit then check and adjust for decimal overflow
-0059   300A           00220     movlw   D'10'
-005A   0200           00221     subwf   INDF, w
-                      00222     ; If carry = 1 (result >= 0) adjust for decimal overflow
-005B   1803           00223     btfsc   STATUS, C
-005C   0080           00224     movwf   INDF
-                      00225     ; Point to next BCD digit
-005D   0384           00226     decf    FSR, f
-                      00227     ; Decrement digcnt, loop if > 0
-005E   0BB7           00228     decfsz  digcnt, f
-005F   2858           00229     goto    b2bcd2
-                      00230     ; Decrement bitcnt, loop if > 0
-0060   0BB6           00231     decfsz  bitcnt, f
-0061   2850           00232     goto    b2bcd1
-0062   3400           00233     retlw   0   
-                      00234 
-                      00235     
-                      00236 ;;;;;;;;;;;;;;;;;;;;;;;;;;;
-                      00237 ;   LCD Code              ;
-                      00238 ;;;;;;;;;;;;;;;;;;;;;;;;;;;
+                      00191         
+                      00192 ; Convert freqh into bcd and store it in freqd
+                      00193 ; Taken from http://www.piclist.com/techref/member/BB-LTL-/index.htm
+0044                  00194 freqToBCD:
+0044   01AC           00195     clrf    freqd9      ; Clear previous value
+0045   01AD           00196     clrf    freqd8
+0046   01AE           00197     clrf    freqd7
+0047   01AF           00198     clrf    freqd6
+0048   01B0           00199     clrf    freqd5
+0049   01B1           00200     clrf    freqd4
+004A   01B2           00201     clrf    freqd3
+004B   01B3           00202     clrf    freqd2
+004C   01B4           00203     clrf    freqd1
+004D   01B5           00204     clrf    freqd0
+                      00205     ; Outer loop bit counter
+004E   3020           00206     movlw   D'32'       
+004F   00B6           00207     movwf   bitcnt      
+0050                  00208 b2bcd1:
+                      00209     ; Shift 32bit bin acc left to put ms bit into carry
+0050   0DAB           00210     rlf     freqh0, f   
+0051   0DAA           00211     rlf     freqh1, f      
+0052   0DA9           00212     rlf     freqh2, f      
+0053   0DA8           00213     rlf     freqh3, f   
+                      00214     ; Point to address of ls bcd digit
+0054   3035           00215     movlw   freqd0      
+0055   0084           00216     movwf   FSR         
+                      00217     ; Inner loop digit coutner
+0056   300A           00218     movlw   D'10'
+0057   00B7           00219     movwf   digcnt
+0058                  00220 b2bcd2:
+                      00221     ; Shift carry into bcd digit
+0058   0D80           00222     rlf     INDF, f
+                      00223     ; Substract 10 from digit then check and adjust for decimal overflow
+0059   300A           00224     movlw   D'10'
+005A   0200           00225     subwf   INDF, w
+                      00226     ; If carry = 1 (result >= 0) adjust for decimal overflow
+005B   1803           00227     btfsc   STATUS, C
+005C   0080           00228     movwf   INDF
+                      00229     ; Point to next BCD digit
+005D   0384           00230     decf    FSR, f
+                      00231     ; Decrement digcnt, loop if > 0
+005E   0BB7           00232     decfsz  digcnt, f
+005F   2858           00233     goto    b2bcd2
+                      00234     ; Decrement bitcnt, loop if > 0
+0060   0BB6           00235     decfsz  bitcnt, f
+0061   2850           00236     goto    b2bcd1
+0062   3400           00237     retlw   0   
+                      00238 
                       00239     
-                      00240     
-                      00241     
-                      00242     
-                      00243 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-MPASM 5.76                   FREQCOUNTER.ASM   1-18-2018  13:31:36         PAGE  6
+                      00240 ;;;;;;;;;;;;;;;;;;;;;;;;;;;
+                      00241 ;   LCD Code              ;
+                      00242 ;;;;;;;;;;;;;;;;;;;;;;;;;;;
+                      00243 ; LCD connected in 4 bit mode through 74hc595
+MPASM 5.76                   FREQCOUNTER.ASM   1-18-2018  16:14:09         PAGE  6
 
 
 LOC  OBJECT CODE     LINE SOURCE TEXT
   VALUE
 
-                      00244 ; Interrupt Service Routine;    
-                      00245 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;   
-0063                  00246 isr:
-                      00247     bank0
-0063   1283               M         bcf STATUS, 5
-                      00248     ; Disable Int
-0064   138B           00249     bcf     INTCON, 7 
-                      00250     ; Context Save    
-0065   00A0           00251     movwf   w_tmp
-0066   0E03           00252     swapf   STATUS, w
-0067   00A1           00253     movwf   status_tmp
-                      00254     ; end Context Save
-                      00255     
-                      00256     ; ISR
-                      00257     ; Check if tmr0 overflowed
-0068   190B           00258     btfsc   INTCON, 2
-0069   2023           00259     call    stopCounting
-                      00260     ; Check if tmr1 overflowed
-006A   180C           00261     btfsc   PIR1, 0
-006B   202F           00262     call    incTmr1Cntr
-                      00263     
-                      00264     ; Context Retrive
-006C   0E21           00265     swapf   status_tmp, w
-006D   0083           00266     movwf   STATUS
-006E   0EA0           00267     swapf   w_tmp, f
-006F   0E20           00268     swapf   w_tmp, w
-                      00269     ; Return    
-0070   0009           00270     retfie
-                      00271     
-                      00272     end
-MPASM 5.76                   FREQCOUNTER.ASM   1-18-2018  13:31:36         PAGE  7
+                      00244 ; LCD DB7:DB4 connected to QA:QD
+                      00245 ; LCD RS connected to QH
+                      00246     
+                      00247     ; Some macros to help with lcd
+Warning[207]: Found label after column 1. (lcd_shift_out)
+                      00248     lcd_shift_out       macro
+                      00249     bcf     STATUS, C
+                      00250     rrf     lcd_tmp
+                      00251     btfsc   STATUS, C
+                      00252     bsf     lcdData
+                      00253     btfss   STATUS, C
+                      00254     bcf     lcdData
+                      00255     bsf     lcdClk
+                      00256     nop
+                      00257     bcf     lcdClk     
+                      00258     nop
+                      00259     endm
+                      00260     
+Warning[207]: Found label after column 1. (lcd_send_0)
+                      00261     lcd_send_0  macro
+                      00262     bcf     lcdData
+                      00263     bsf     lcdClk
+                      00264     nop
+                      00265     bcf     lcdClk
+                      00266     nop
+                      00267     endm
+                      00268     
+Warning[207]: Found label after column 1. (lcd_send_1)
+                      00269     lcd_send_1  macro
+                      00270     bsf     lcdData
+                      00271     bsf     lcdClk
+                      00272     nop
+                      00273     bcf     lcdClk   
+                      00274     nop
+                      00275     endm    
+                      00276     
+0063                  00277 lcd_send_cmd:   ; Sends word in lcd_data to lcd
+                      00278     ; Send higher nibble
+0063   0E38           00279     swapf   lcd_data, w
+0064   00B9           00280     movwf   lcd_tmp
+                      00281     ; Shift out 4 (higher) bits
+                      00282     lcd_shift_out
+0065   1003               M     bcf     STATUS, C
+Message[305]: Using default destination of 1 (file).
+0066   0CB9               M     rrf     lcd_tmp
+0067   1803               M     btfsc   STATUS, C
+0068   1405               M     bsf     lcdData
+0069   1C03               M     btfss   STATUS, C
+006A   1005               M     bcf     lcdData
+006B   1485               M     bsf     lcdClk
+006C   0000               M     nop
+006D   1085               M     bcf     lcdClk     
+006E   0000               M     nop
+MPASM 5.76                   FREQCOUNTER.ASM   1-18-2018  16:14:09         PAGE  7
+
+
+LOC  OBJECT CODE     LINE SOURCE TEXT
+  VALUE
+
+                      00283     lcd_shift_out
+006F   1003               M     bcf     STATUS, C
+Message[305]: Using default destination of 1 (file).
+0070   0CB9               M     rrf     lcd_tmp
+0071   1803               M     btfsc   STATUS, C
+0072   1405               M     bsf     lcdData
+0073   1C03               M     btfss   STATUS, C
+0074   1005               M     bcf     lcdData
+0075   1485               M     bsf     lcdClk
+0076   0000               M     nop
+0077   1085               M     bcf     lcdClk     
+0078   0000               M     nop
+                      00284     lcd_shift_out
+0079   1003               M     bcf     STATUS, C
+Message[305]: Using default destination of 1 (file).
+007A   0CB9               M     rrf     lcd_tmp
+007B   1803               M     btfsc   STATUS, C
+007C   1405               M     bsf     lcdData
+007D   1C03               M     btfss   STATUS, C
+007E   1005               M     bcf     lcdData
+007F   1485               M     bsf     lcdClk
+0080   0000               M     nop
+0081   1085               M     bcf     lcdClk     
+0082   0000               M     nop
+                      00285     lcd_shift_out
+0083   1003               M     bcf     STATUS, C
+Message[305]: Using default destination of 1 (file).
+0084   0CB9               M     rrf     lcd_tmp
+0085   1803               M     btfsc   STATUS, C
+0086   1405               M     bsf     lcdData
+0087   1C03               M     btfss   STATUS, C
+0088   1005               M     bcf     lcdData
+0089   1485               M     bsf     lcdClk
+008A   0000               M     nop
+008B   1085               M     bcf     lcdClk     
+008C   0000               M     nop
+                      00286     ; Send 3 0s
+                      00287     lcd_send_0
+008D   1005               M     bcf     lcdData
+008E   1485               M     bsf     lcdClk
+008F   0000               M     nop
+0090   1085               M     bcf     lcdClk
+0091   0000               M     nop
+                      00288     lcd_send_0
+0092   1005               M     bcf     lcdData
+0093   1485               M     bsf     lcdClk
+0094   0000               M     nop
+0095   1085               M     bcf     lcdClk
+0096   0000               M     nop
+                      00289     lcd_send_0
+0097   1005               M     bcf     lcdData
+0098   1485               M     bsf     lcdClk
+0099   0000               M     nop
+MPASM 5.76                   FREQCOUNTER.ASM   1-18-2018  16:14:09         PAGE  8
+
+
+LOC  OBJECT CODE     LINE SOURCE TEXT
+  VALUE
+
+009A   1085               M     bcf     lcdClk
+009B   0000               M     nop
+                      00290     ; Send 0 for selecting lcd command register
+                      00291     lcd_send_0
+009C   1005               M     bcf     lcdData
+009D   1485               M     bsf     lcdClk
+009E   0000               M     nop
+009F   1085               M     bcf     lcdClk
+00A0   0000               M     nop
+                      00292     ; Couple of nops to adjust for lcd latency
+00A1   0000           00293     nop
+00A2   0000           00294     nop
+00A3   0000           00295     nop
+00A4   0000           00296     nop
+00A5   0000           00297     nop
+                      00298     ; Send lcd EN
+00A6   1505           00299     bsf     lcdEn
+00A7   0000           00300     nop
+00A8   0000           00301     nop
+00A9   0000           00302     nop
+00AA   0000           00303     nop
+00AB   0000           00304     nop
+00AC   1105           00305     bcf     lcdEn
+00AD   0000           00306     nop
+00AE   0000           00307     nop
+00AF   0000           00308     nop
+00B0   0000           00309     nop
+00B1   0000           00310     nop
+00B2   0008           00311     return
+                      00312     
+00B3                  00313 lcd_send_data:  ; Sends word in lcd_data to lcd
+                      00314     ; Send higher nibble
+00B3   0E38           00315     swapf   lcd_data, w
+00B4   00B9           00316     movwf   lcd_tmp
+                      00317     ; Shift out 4 (higher) bits
+                      00318     lcd_shift_out
+00B5   1003               M     bcf     STATUS, C
+Message[305]: Using default destination of 1 (file).
+00B6   0CB9               M     rrf     lcd_tmp
+00B7   1803               M     btfsc   STATUS, C
+00B8   1405               M     bsf     lcdData
+00B9   1C03               M     btfss   STATUS, C
+00BA   1005               M     bcf     lcdData
+00BB   1485               M     bsf     lcdClk
+00BC   0000               M     nop
+00BD   1085               M     bcf     lcdClk     
+00BE   0000               M     nop
+                      00319     lcd_shift_out
+00BF   1003               M     bcf     STATUS, C
+Message[305]: Using default destination of 1 (file).
+00C0   0CB9               M     rrf     lcd_tmp
+00C1   1803               M     btfsc   STATUS, C
+00C2   1405               M     bsf     lcdData
+MPASM 5.76                   FREQCOUNTER.ASM   1-18-2018  16:14:09         PAGE  9
+
+
+LOC  OBJECT CODE     LINE SOURCE TEXT
+  VALUE
+
+00C3   1C03               M     btfss   STATUS, C
+00C4   1005               M     bcf     lcdData
+00C5   1485               M     bsf     lcdClk
+00C6   0000               M     nop
+00C7   1085               M     bcf     lcdClk     
+00C8   0000               M     nop
+                      00320     lcd_shift_out
+00C9   1003               M     bcf     STATUS, C
+Message[305]: Using default destination of 1 (file).
+00CA   0CB9               M     rrf     lcd_tmp
+00CB   1803               M     btfsc   STATUS, C
+00CC   1405               M     bsf     lcdData
+00CD   1C03               M     btfss   STATUS, C
+00CE   1005               M     bcf     lcdData
+00CF   1485               M     bsf     lcdClk
+00D0   0000               M     nop
+00D1   1085               M     bcf     lcdClk     
+00D2   0000               M     nop
+                      00321     lcd_shift_out
+00D3   1003               M     bcf     STATUS, C
+Message[305]: Using default destination of 1 (file).
+00D4   0CB9               M     rrf     lcd_tmp
+00D5   1803               M     btfsc   STATUS, C
+00D6   1405               M     bsf     lcdData
+00D7   1C03               M     btfss   STATUS, C
+00D8   1005               M     bcf     lcdData
+00D9   1485               M     bsf     lcdClk
+00DA   0000               M     nop
+00DB   1085               M     bcf     lcdClk     
+00DC   0000               M     nop
+                      00322     ; Send 3 0s
+                      00323     lcd_send_0
+00DD   1005               M     bcf     lcdData
+00DE   1485               M     bsf     lcdClk
+00DF   0000               M     nop
+00E0   1085               M     bcf     lcdClk
+00E1   0000               M     nop
+                      00324     lcd_send_0
+00E2   1005               M     bcf     lcdData
+00E3   1485               M     bsf     lcdClk
+00E4   0000               M     nop
+00E5   1085               M     bcf     lcdClk
+00E6   0000               M     nop
+                      00325     lcd_send_0
+00E7   1005               M     bcf     lcdData
+00E8   1485               M     bsf     lcdClk
+00E9   0000               M     nop
+00EA   1085               M     bcf     lcdClk
+00EB   0000               M     nop
+                      00326     ; Send 0 for selecting lcd command register
+                      00327     lcd_send_1
+00EC   1405               M     bsf     lcdData
+00ED   1485               M     bsf     lcdClk
+MPASM 5.76                   FREQCOUNTER.ASM   1-18-2018  16:14:09         PAGE 10
+
+
+LOC  OBJECT CODE     LINE SOURCE TEXT
+  VALUE
+
+00EE   0000               M     nop
+00EF   1085               M     bcf     lcdClk   
+00F0   0000               M     nop
+                      00328     ; Couple of nops to adjust for lcd latency
+00F1   0000           00329     nop
+00F2   0000           00330     nop
+00F3   0000           00331     nop
+00F4   0000           00332     nop
+00F5   0000           00333     nop
+                      00334     ; Send lcd EN
+00F6   1505           00335     bsf     lcdEn
+00F7   0000           00336     nop
+00F8   0000           00337     nop
+00F9   0000           00338     nop
+00FA   0000           00339     nop
+00FB   0000           00340     nop
+00FC   1105           00341     bcf     lcdEn
+00FD   0000           00342     nop
+00FE   0000           00343     nop
+00FF   0000           00344     nop
+0100   0000           00345     nop
+0101   0000           00346     nop
+0102   0008           00347     return    
+                      00348     
+                      00349 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+                      00350 ; Interrupt Service Routine;    
+                      00351 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;   
+0103                  00352 isr:
+                      00353     bank0
+0103   1283               M         bcf STATUS, 5
+                      00354     ; Disable Int
+0104   138B           00355     bcf     INTCON, 7 
+                      00356     ; Context Save    
+0105   00A0           00357     movwf   w_tmp
+0106   0E03           00358     swapf   STATUS, w
+0107   00A1           00359     movwf   status_tmp
+                      00360     ; end Context Save
+                      00361     
+                      00362     ; ISR
+                      00363     ; Check if tmr0 overflowed
+0108   190B           00364     btfsc   INTCON, 2
+0109   2023           00365     call    stopCounting
+                      00366     ; Check if tmr1 overflowed
+010A   180C           00367     btfsc   PIR1, 0
+010B   202F           00368     call    incTmr1Cntr
+                      00369     
+                      00370     ; Context Retrive
+010C   0E21           00371     swapf   status_tmp, w
+010D   0083           00372     movwf   STATUS
+010E   0EA0           00373     swapf   w_tmp, f
+010F   0E20           00374     swapf   w_tmp, w
+                      00375     ; Return    
+0110   0009           00376     retfie
+MPASM 5.76                   FREQCOUNTER.ASM   1-18-2018  16:14:09         PAGE 11
+
+
+LOC  OBJECT CODE     LINE SOURCE TEXT
+  VALUE
+
+                      00377     
+                      00378     end
+MPASM 5.76                   FREQCOUNTER.ASM   1-18-2018  16:14:09         PAGE 12
 
 
 SYMBOL TABLE
@@ -388,7 +655,7 @@ GP2                               00000002
 GP3                               00000003
 GP4                               00000004
 GP5                               00000005
-MPASM 5.76                   FREQCOUNTER.ASM   1-18-2018  13:31:36         PAGE  8
+MPASM 5.76                   FREQCOUNTER.ASM   1-18-2018  16:14:09         PAGE 13
 
 
 SYMBOL TABLE
@@ -447,7 +714,7 @@ RD                                00000000
 RP0                               00000005
 RP1                               00000006
 STATUS                            00000003
-MPASM 5.76                   FREQCOUNTER.ASM   1-18-2018  13:31:36         PAGE  9
+MPASM 5.76                   FREQCOUNTER.ASM   1-18-2018  16:14:09         PAGE 14
 
 
 SYMBOL TABLE
@@ -506,7 +773,7 @@ _BOREN_OFF                        00003FBF
 _BOREN_ON                         00003FFF
 _CONFIG                           00002007
 _CPD_OFF                          00003FFF
-MPASM 5.76                   FREQCOUNTER.ASM   1-18-2018  13:31:36         PAGE 10
+MPASM 5.76                   FREQCOUNTER.ASM   1-18-2018  16:14:09         PAGE 15
 
 
 SYMBOL TABLE
@@ -565,7 +832,7 @@ freqd2                            00000033
 freqd3                            00000032
 freqd4                            00000031
 freqd5                            00000030
-MPASM 5.76                   FREQCOUNTER.ASM   1-18-2018  13:31:36         PAGE 11
+MPASM 5.76                   FREQCOUNTER.ASM   1-18-2018  16:14:09         PAGE 16
 
 
 SYMBOL TABLE
@@ -582,10 +849,17 @@ freqh3                            00000028
 getFreq                           00000033
 incTmr1Cntr                       0000002F
 init                              0000000C
-isr                               00000063
+isr                               00000103
 lcdClk                            GPIO, 1
 lcdData                           GPIO, 0
 lcdEn                             GPIO, 2
+lcd_data                          00000038
+lcd_send_0                        
+lcd_send_1                        
+lcd_send_cmd                      00000063
+lcd_send_data                     000000B3
+lcd_shift_out                     
+lcd_tmp                           00000039
 range_err_flag                    00000024
 repeat                            00000007
 start                             00000005
@@ -600,17 +874,26 @@ w_tmp                             00000020
 MEMORY USAGE MAP ('X' = Used,  '-' = Unused)
 
 0000 : X---XXXXXXXXXXXX XXXXXXXXXXXXXXXX XXXXXXXXXXXXXXXX XXXXXXXXXXXXXXXX
-0040 : XXXXXXXXXXXXXXXX XXXXXXXXXXXXXXXX XXXXXXXXXXXXXXXX X---------------
+0040 : XXXXXXXXXXXXXXXX XXXXXXXXXXXXXXXX XXXXXXXXXXXXXXXX XXXXXXXXXXXXXXXX
+0080 : XXXXXXXXXXXXXXXX XXXXXXXXXXXXXXXX XXXXXXXXXXXXXXXX XXXXXXXXXXXXXXXX
+00C0 : XXXXXXXXXXXXXXXX XXXXXXXXXXXXXXXX XXXXXXXXXXXXXXXX XXXXXXXXXXXXXXXX
+0100 : XXXXXXXXXXXXXXXX X--------------- ---------------- ----------------
 2000 : -------X-------- ---------------- ---------------- ----------------
 
 All other memory blocks unused.
 
-Program Memory Words Used:   110
-Program Memory Words Free:   914
+Program Memory Words Used:   270
+Program Memory Words Free:   754
+
+
+MPASM 5.76                   FREQCOUNTER.ASM   1-18-2018  16:14:09         PAGE 17
+
+
+
 
 
 Errors   :     0
-Warnings :     0 reported,     0 suppressed
-Messages :     7 reported,     0 suppressed
+Warnings :     3 reported,     0 suppressed
+Messages :    15 reported,     0 suppressed
 
 

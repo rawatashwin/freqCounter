@@ -1,12 +1,12 @@
 MPLINK 5.08, LINKER
-Linker Map File - Created Thu Jan 18 13:31:37 2018
+Linker Map File - Created Thu Jan 18 16:14:10 2018
 
                                  Section Info
                   Section       Type    Address   Location Size(Bytes)
                 ---------  ---------  ---------  ---------  ---------
                    .org_0       code   0x000000    program   0x000000
                    .org_1       code   0x000000    program   0x000002
-                   .org_2       code   0x000004    program   0x0000da
+                   .org_2       code   0x000004    program   0x00021a
 .config_2007_FREQCOUNTER.O       code   0x002007    program   0x000002
 
 
@@ -15,9 +15,9 @@ Linker Map File - Created Thu Jan 18 13:31:37 2018
                                Start         End      
                            ---------   ---------      
                             0x000000    0x000000      
-                            0x000004    0x000070      
+                            0x000004    0x000110      
                             0x002007    0x002007      
-            111 out of 1158 program addresses used, program memory utilization is 9%
+            271 out of 1158 program addresses used, program memory utilization is 23%
 
 
 
@@ -30,7 +30,9 @@ Linker Map File - Created Thu Jan 18 13:31:37 2018
                   getFreq   0x000033    program     static C:\Users\Ashwin\workspace\MPLABXProjects\FreqCounter.X\freqcounter.asm
               incTmr1Cntr   0x00002f    program     static C:\Users\Ashwin\workspace\MPLABXProjects\FreqCounter.X\freqcounter.asm
                      init   0x00000c    program     static C:\Users\Ashwin\workspace\MPLABXProjects\FreqCounter.X\freqcounter.asm
-                      isr   0x000063    program     static C:\Users\Ashwin\workspace\MPLABXProjects\FreqCounter.X\freqcounter.asm
+                      isr   0x000103    program     static C:\Users\Ashwin\workspace\MPLABXProjects\FreqCounter.X\freqcounter.asm
+             lcd_send_cmd   0x000063    program     static C:\Users\Ashwin\workspace\MPLABXProjects\FreqCounter.X\freqcounter.asm
+            lcd_send_data   0x0000b3    program     static C:\Users\Ashwin\workspace\MPLABXProjects\FreqCounter.X\freqcounter.asm
                    repeat   0x000007    program     static C:\Users\Ashwin\workspace\MPLABXProjects\FreqCounter.X\freqcounter.asm
                     start   0x000005    program     static C:\Users\Ashwin\workspace\MPLABXProjects\FreqCounter.X\freqcounter.asm
             startCounting   0x000017    program     static C:\Users\Ashwin\workspace\MPLABXProjects\FreqCounter.X\freqcounter.asm
@@ -53,6 +55,8 @@ Linker Map File - Created Thu Jan 18 13:31:37 2018
                 freqToBCD   0x000044    program     static C:\Users\Ashwin\workspace\MPLABXProjects\FreqCounter.X\freqcounter.asm
                    b2bcd1   0x000050    program     static C:\Users\Ashwin\workspace\MPLABXProjects\FreqCounter.X\freqcounter.asm
                    b2bcd2   0x000058    program     static C:\Users\Ashwin\workspace\MPLABXProjects\FreqCounter.X\freqcounter.asm
-                      isr   0x000063    program     static C:\Users\Ashwin\workspace\MPLABXProjects\FreqCounter.X\freqcounter.asm
+             lcd_send_cmd   0x000063    program     static C:\Users\Ashwin\workspace\MPLABXProjects\FreqCounter.X\freqcounter.asm
+            lcd_send_data   0x0000b3    program     static C:\Users\Ashwin\workspace\MPLABXProjects\FreqCounter.X\freqcounter.asm
+                      isr   0x000103    program     static C:\Users\Ashwin\workspace\MPLABXProjects\FreqCounter.X\freqcounter.asm
 
 

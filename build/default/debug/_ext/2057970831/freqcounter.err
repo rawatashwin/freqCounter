@@ -1,7 +1,0 @@
-Message[302] ..\..\..\DOCUMENTS\WORKSPACE\FREQCOUNTER.ASM 82 : Register in operand not in bank 0.  Ensure that bank bits are correct.
-Message[302] ..\..\..\DOCUMENTS\WORKSPACE\FREQCOUNTER.ASM 87 : Register in operand not in bank 0.  Ensure that bank bits are correct.
-Message[302] ..\..\..\DOCUMENTS\WORKSPACE\FREQCOUNTER.ASM 97 : Register in operand not in bank 0.  Ensure that bank bits are correct.
-Message[302] ..\..\..\DOCUMENTS\WORKSPACE\FREQCOUNTER.ASM 107 : Register in operand not in bank 0.  Ensure that bank bits are correct.
-Message[305] ..\..\..\DOCUMENTS\WORKSPACE\FREQCOUNTER.ASM 142 : Using default destination of 1 (file).
-Message[305] ..\..\..\DOCUMENTS\WORKSPACE\FREQCOUNTER.ASM 147 : Using default destination of 1 (file).
-Message[305] ..\..\..\DOCUMENTS\WORKSPACE\FREQCOUNTER.ASM 171 : Using default destination of 1 (file).
