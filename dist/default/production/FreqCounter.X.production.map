@@ -1,0 +1,68 @@
+MPLINK 5.08, LINKER
+Linker Map File - Created Thu Jan 18 17:14:58 2018
+
+                                 Section Info
+                  Section       Type    Address   Location Size(Bytes)
+                ---------  ---------  ---------  ---------  ---------
+                   .org_0       code   0x000000    program   0x000000
+                   .org_1       code   0x000000    program   0x000002
+                   .org_2       code   0x000004    program   0x000398
+.config_2007_FREQCOUNTER.O       code   0x002007    program   0x000002
+
+
+
+                              Program Memory Usage 
+                               Start         End      
+                           ---------   ---------      
+                            0x000000    0x000000      
+                            0x000004    0x0001cf      
+                            0x002007    0x002007      
+            462 out of 1158 program addresses used, program memory utilization is 39%
+
+
+
+                              Symbols - Sorted by Name
+                     Name    Address   Location    Storage File                     
+                ---------  ---------  ---------  --------- ---------                
+                  Delay_0   0x0001c9    program     static C:\Users\Ashwin\workspace\MPLABXProjects\FreqCounter.X\freqcounter.asm
+                   b2bcd1   0x000061    program     static C:\Users\Ashwin\workspace\MPLABXProjects\FreqCounter.X\freqcounter.asm
+                   b2bcd2   0x000069    program     static C:\Users\Ashwin\workspace\MPLABXProjects\FreqCounter.X\freqcounter.asm
+                freqToBCD   0x000055    program     static C:\Users\Ashwin\workspace\MPLABXProjects\FreqCounter.X\freqcounter.asm
+                  getFreq   0x000044    program     static C:\Users\Ashwin\workspace\MPLABXProjects\FreqCounter.X\freqcounter.asm
+              incTmr1Cntr   0x000040    program     static C:\Users\Ashwin\workspace\MPLABXProjects\FreqCounter.X\freqcounter.asm
+                     init   0x00000c    program     static C:\Users\Ashwin\workspace\MPLABXProjects\FreqCounter.X\freqcounter.asm
+                      isr   0x0001b2    program     static C:\Users\Ashwin\workspace\MPLABXProjects\FreqCounter.X\freqcounter.asm
+             lcd_send_cmd   0x000074    program     static C:\Users\Ashwin\workspace\MPLABXProjects\FreqCounter.X\freqcounter.asm
+            lcd_send_data   0x000113    program     static C:\Users\Ashwin\workspace\MPLABXProjects\FreqCounter.X\freqcounter.asm
+                   repeat   0x000007    program     static C:\Users\Ashwin\workspace\MPLABXProjects\FreqCounter.X\freqcounter.asm
+                    start   0x000005    program     static C:\Users\Ashwin\workspace\MPLABXProjects\FreqCounter.X\freqcounter.asm
+            startCounting   0x000028    program     static C:\Users\Ashwin\workspace\MPLABXProjects\FreqCounter.X\freqcounter.asm
+             stopCounting   0x000034    program     static C:\Users\Ashwin\workspace\MPLABXProjects\FreqCounter.X\freqcounter.asm
+                   times2   0x00004d    program     static C:\Users\Ashwin\workspace\MPLABXProjects\FreqCounter.X\freqcounter.asm
+                 wait_1ms   0x0001c0    program     static C:\Users\Ashwin\workspace\MPLABXProjects\FreqCounter.X\freqcounter.asm
+                wait_40ms   0x0001c5    program     static C:\Users\Ashwin\workspace\MPLABXProjects\FreqCounter.X\freqcounter.asm
+
+
+
+                              Symbols - Sorted by Address
+                     Name    Address   Location    Storage File                     
+                ---------  ---------  ---------  --------- ---------                
+                    start   0x000005    program     static C:\Users\Ashwin\workspace\MPLABXProjects\FreqCounter.X\freqcounter.asm
+                   repeat   0x000007    program     static C:\Users\Ashwin\workspace\MPLABXProjects\FreqCounter.X\freqcounter.asm
+                     init   0x00000c    program     static C:\Users\Ashwin\workspace\MPLABXProjects\FreqCounter.X\freqcounter.asm
+            startCounting   0x000028    program     static C:\Users\Ashwin\workspace\MPLABXProjects\FreqCounter.X\freqcounter.asm
+             stopCounting   0x000034    program     static C:\Users\Ashwin\workspace\MPLABXProjects\FreqCounter.X\freqcounter.asm
+              incTmr1Cntr   0x000040    program     static C:\Users\Ashwin\workspace\MPLABXProjects\FreqCounter.X\freqcounter.asm
+                  getFreq   0x000044    program     static C:\Users\Ashwin\workspace\MPLABXProjects\FreqCounter.X\freqcounter.asm
+                   times2   0x00004d    program     static C:\Users\Ashwin\workspace\MPLABXProjects\FreqCounter.X\freqcounter.asm
+                freqToBCD   0x000055    program     static C:\Users\Ashwin\workspace\MPLABXProjects\FreqCounter.X\freqcounter.asm
+                   b2bcd1   0x000061    program     static C:\Users\Ashwin\workspace\MPLABXProjects\FreqCounter.X\freqcounter.asm
+                   b2bcd2   0x000069    program     static C:\Users\Ashwin\workspace\MPLABXProjects\FreqCounter.X\freqcounter.asm
+             lcd_send_cmd   0x000074    program     static C:\Users\Ashwin\workspace\MPLABXProjects\FreqCounter.X\freqcounter.asm
+            lcd_send_data   0x000113    program     static C:\Users\Ashwin\workspace\MPLABXProjects\FreqCounter.X\freqcounter.asm
+                      isr   0x0001b2    program     static C:\Users\Ashwin\workspace\MPLABXProjects\FreqCounter.X\freqcounter.asm
+                 wait_1ms   0x0001c0    program     static C:\Users\Ashwin\workspace\MPLABXProjects\FreqCounter.X\freqcounter.asm
+                wait_40ms   0x0001c5    program     static C:\Users\Ashwin\workspace\MPLABXProjects\FreqCounter.X\freqcounter.asm
+                  Delay_0   0x0001c9    program     static C:\Users\Ashwin\workspace\MPLABXProjects\FreqCounter.X\freqcounter.asm
+
+
